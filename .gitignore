@@ -1,45 +1,52 @@
-# Root Gitignore - Sistema Acolher
+# ==============================================================================
+# SISTEMA ACOLHER - .gitignore (Arquivos Sensíveis e Temporários)
+# ==============================================================================
 
-# Dependencies
+# 1. ARQUIVOS SENSÍVEIS E CREDENCIAIS (NUNCA COMMITAR)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+auth.json
+Homestead.json
+Homestead.yaml
+
+# 2. DEPENDÊNCIAS DE PACOTES (Instalados via composer/npm)
 /node_modules/
 /vendor/
 backend/vendor/
 frontend/node_modules/
 
-# Next.js & Build outputs
+# 3. BUILDS E ARQUIVOS TEMPORÁRIOS DO NEXT.JS / COMPILADORES
 frontend/.next/
 frontend/out/
 frontend/build/
 .next/
+.turbo/
+*.tsbuildinfo
 
-# Environment variables & secrets
-.env
-.env.local
-.env.*.local
-backend/.env
-backend/.env.backup
-backend/.env.production
-frontend/.env*.local
-
-# Storage & Logs
-backend/storage/*.key
+# 4. STORAGE, SESSÕES E LOGS DO LARAVEL
 backend/storage/logs/*.log
 backend/storage/framework/cache/*
 backend/storage/framework/sessions/*
 backend/storage/framework/views/*
+backend/storage/pail/
 backend/public/storage
 backend/public/hot
+backend/.phpunit.cache/
+
+# 5. LOGS DE DEBUG
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-# IDE & System files
+# 6. CONFIGURAÇÕES LOCAIS DE IDE E SISTEMA OPERACIONAL
 .DS_Store
+Thumbs.db
 .idea/
 .vscode/
 .gemini/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+*.swp
+*.swo

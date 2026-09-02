@@ -1,0 +1,45 @@
+# Root Gitignore - Sistema Acolher
+
+# Dependencies
+/node_modules/
+/vendor/
+backend/vendor/
+frontend/node_modules/
+
+# Next.js & Build outputs
+frontend/.next/
+frontend/out/
+frontend/build/
+.next/
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+backend/.env
+backend/.env.backup
+backend/.env.production
+frontend/.env*.local
+
+# Storage & Logs
+backend/storage/*.key
+backend/storage/logs/*.log
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/public/storage
+backend/public/hot
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE & System files
+.DS_Store
+.idea/
+.vscode/
+.gemini/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

@@ -17,19 +17,24 @@ class AuditoriaService
         ?Usuario $usuario = null,
         ?array $dados = null,
         ?Request $request = null
-    ): AuditoriaLog {
-        $req = $request ?? request();
+    ): ?AuditoriaLog {
+        try {
+            $req = $request ?? request();
 
-        return AuditoriaLog::create([
-            'usuario_id' => $usuario?->id ?? auth('sanctum')->id(),
-            'usuario_nome' => $usuario?->nome ?? auth('sanctum')->user()?->nome,
-            'evento' => $evento,
-            'descricao' => $descricao,
-            'ip_address' => $req?->ip(),
-            'user_agent' => $req ? substr($req->userAgent() ?? '', 0, 500) : null,
-            'dados' => $dados,
-            'created_at' => now(),
-        ]);
+            return AuditoriaLog::create([
+                'usuario_id' => $usuario?->id ?? auth('sanctum')->id(),
+                'usuario_nome' => $usuario?->nome ?? auth('sanctum')->user()?->nome,
+                'evento' => $evento,
+                'descricao' => $descricao,
+                'ip_address' => $req?->ip(),
+                'user_agent' => $req ? substr($req->userAgent() ?? '', 0, 500) : null,
+                'dados' => $dados,
+                'created_at' => now(),
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('AuditoriaLog falhou silenciosamente: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**

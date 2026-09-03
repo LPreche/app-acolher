@@ -1,6 +1,11 @@
 function getApiBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
+  const url =
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.NEXT_PUBLIC_API_URL_FRONT ||
+    process.env.API_URL_FRONT;
+
+  if (url) {
+    return url.endsWith('/') ? url.slice(0, -1) : url;
   }
   // No navegador (seja ngrok, celular ou localhost), usa a rota relativa '/api'
   // O Next.js se encarrega de repassar diretamente ao Laravel local na porta 8000

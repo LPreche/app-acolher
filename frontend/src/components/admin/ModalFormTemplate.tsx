@@ -98,9 +98,9 @@ export function ModalFormTemplate({
       subtitulo="Configure os textos padrão de WhatsApp para Segunda ou Sexta-feira."
       tamanho="lg"
     >
-      <form onSubmit={handleSubmit} className="space-y-4 text-left">
+      <form onSubmit={handleSubmit} className="space-y-4 text-left w-full box-border">
         {erro && (
-          <div className="p-3 bg-rose-50 text-rose-700 text-xs font-medium rounded-xl border border-rose-200">
+          <div className="p-3 bg-rose-50 text-rose-700 text-xs font-medium rounded-xl border border-rose-200 animate-shake">
             {erro}
           </div>
         )}
@@ -113,16 +113,16 @@ export function ModalFormTemplate({
           required
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full box-border">
           {/* Momento do Contato */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+          <div className="space-y-1.5 w-full">
+            <label className="block text-[clamp(0.68rem,2.2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
               Momento do Contato *
             </label>
             <select
               value={momento}
               onChange={(e) => setMomento(e.target.value as MomentoMensagem)}
-              className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370]"
+              className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370] transition-smooth box-border"
             >
               <option value="segunda">📅 Segunda-feira (Boas-Vindas)</option>
               <option value="sexta">✨ Sexta-feira (Convite Culto)</option>
@@ -131,14 +131,14 @@ export function ModalFormTemplate({
           </div>
 
           {/* Tipo de Acolhimento */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+          <div className="space-y-1.5 w-full">
+            <label className="block text-[clamp(0.68rem,2.2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
               Área de Culto *
             </label>
             <select
               value={tipoAcolhimento}
               onChange={(e) => setTipoAcolhimento(e.target.value as TipoAcolhimentoTemplate)}
-              className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370]"
+              className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370] transition-smooth box-border"
             >
               <option value="ambos">✨ Ambos (Família & Vertical)</option>
               <option value="familia">👥 Acolher Família</option>
@@ -155,17 +155,17 @@ export function ModalFormTemplate({
         />
 
         {/* Conteúdo do Template com Tags Dinâmicas */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+        <div className="space-y-1.5 w-full box-border">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <label className="block text-[clamp(0.68rem,2.2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
               Texto da Mensagem *
             </label>
-            <div className="flex items-center gap-1">
-              <span className="text-[11px] text-slate-400">Tags:</span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] text-slate-400 font-semibold">Inserir:</span>
               <button
                 type="button"
                 onClick={() => inserirTag('{nome}')}
-                className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-[11px] border border-slate-200"
+                className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-[11px] border border-slate-200 transition-colors shadow-2xs"
                 title="Insere o nome do visitante"
               >
                 + &#123;nome&#125;
@@ -173,7 +173,7 @@ export function ModalFormTemplate({
               <button
                 type="button"
                 onClick={() => inserirTag('{responsavel}')}
-                className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-[11px] border border-slate-200"
+                className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-[11px] border border-slate-200 transition-colors shadow-2xs"
                 title="Insere o nome do voluntário responsável"
               >
                 + &#123;responsavel&#125;
@@ -185,7 +185,7 @@ export function ModalFormTemplate({
             value={conteudo}
             onChange={(e) => setConteudo(e.target.value)}
             placeholder="Digite o texto da mensagem... Ex: Olá {nome}, tudo bem? Meu nome é {responsavel}..."
-            className="block w-full rounded-2xl border border-slate-300 bg-white p-3.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3370]"
+            className="block w-full rounded-2xl border border-slate-300 bg-white p-3.5 text-slate-900 text-sm min-h-[100px] focus:outline-none focus:ring-2 focus:ring-[#1E3370] transition-smooth resize-y box-border"
             required
           />
         </div>
@@ -198,16 +198,16 @@ export function ModalFormTemplate({
             onChange={(e) => setAtivo(e.target.checked)}
             className="w-4 h-4 text-[#1E3370] rounded border-slate-300 focus:ring-[#1E3370]"
           />
-          <label htmlFor="template_ativo" className="text-xs font-medium text-slate-700">
+          <label htmlFor="template_ativo" className="text-xs font-semibold text-slate-700 cursor-pointer">
             Modelo ativo para envio
           </label>
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <Button type="button" variant="outline" onClick={onClose} disabled={salvando}>
+        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 w-full">
+          <Button type="button" variant="outline" onClick={onClose} disabled={salvando} className="flex-1 sm:flex-none">
             Cancelar
           </Button>
-          <Button type="submit" variant="primary" carregando={salvando}>
+          <Button type="submit" variant="primary" carregando={salvando} className="flex-1 sm:flex-none font-bold">
             {templateParaEditar ? 'Salvar Alterações' : 'Cadastrar Modelo'}
           </Button>
         </div>

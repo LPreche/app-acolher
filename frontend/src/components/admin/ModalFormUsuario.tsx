@@ -107,9 +107,9 @@ export function ModalFormUsuario({
       }
       tamanho="md"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 w-full box-border">
         {erro && (
-          <div className="p-3 bg-rose-50 text-rose-700 text-xs font-medium rounded-xl border border-rose-200">
+          <div className="p-3 bg-rose-50 text-rose-700 text-xs font-medium rounded-xl border border-rose-200 animate-shake">
             {erro}
           </div>
         )}
@@ -140,14 +140,14 @@ export function ModalFormUsuario({
         />
 
         {/* Perfil de Acesso */}
-        <div className="space-y-1.5 text-left">
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+        <div className="space-y-1.5 text-left w-full">
+          <label className="block text-[clamp(0.68rem,2.2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
             Perfil de Acesso *
           </label>
           <select
             value={perfil}
             onChange={(e) => setPerfil(e.target.value as PerfilUsuario)}
-            className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370]"
+            className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370] transition-smooth box-border"
           >
             <optgroup label="Administração">
               <option value="administrador">🛡️ Administrador Geral (Acesso total)</option>
@@ -183,16 +183,16 @@ export function ModalFormUsuario({
             onChange={(e) => setAtivo(e.target.checked)}
             className="w-4 h-4 text-[#1E3370] rounded border-slate-300 focus:ring-[#1E3370]"
           />
-          <label htmlFor="usuario_ativo" className="text-xs font-medium text-slate-700">
+          <label htmlFor="usuario_ativo" className="text-xs font-semibold text-slate-700 cursor-pointer">
             Usuário ativo no sistema
           </label>
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <Button type="button" variant="outline" onClick={onClose} disabled={salvando}>
+        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 w-full">
+          <Button type="button" variant="outline" onClick={onClose} disabled={salvando} className="flex-1 sm:flex-none">
             Cancelar
           </Button>
-          <Button type="submit" variant="primary" carregando={salvando}>
+          <Button type="submit" variant="primary" carregando={salvando} className="flex-1 sm:flex-none font-bold">
             {usuarioParaEditar ? 'Salvar Alterações' : 'Cadastrar Usuário'}
           </Button>
         </div>

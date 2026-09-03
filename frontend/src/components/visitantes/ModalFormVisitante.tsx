@@ -174,9 +174,9 @@ export function ModalFormVisitante({
       }
       tamanho="md"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 w-full box-border">
         {erroGeral && (
-          <div className="p-3 bg-rose-50 text-rose-700 text-xs font-medium rounded-xl border border-rose-200">
+          <div className="p-3 bg-rose-50 text-rose-700 text-xs font-medium rounded-xl border border-rose-200 animate-shake">
             {erroGeral}
           </div>
         )}
@@ -201,14 +201,14 @@ export function ModalFormVisitante({
 
         {/* Seleção de Voluntário / Responsável (Exibido apenas para Administradores) */}
         {usuario?.e_admin && (
-          <div className="space-y-1.5 text-left">
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+          <div className="space-y-1.5 text-left w-full">
+            <label className="block text-[clamp(0.68rem,2.2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
               Voluntário Responsável
             </label>
             <select
               value={responsavelId || ''}
               onChange={(e) => setResponsavelId(Number(e.target.value))}
-              className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370] transition-smooth"
+              className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370] transition-smooth box-border"
             >
               {usuarios.map((u) => (
                 <option key={u.id} value={u.id}>
@@ -223,14 +223,14 @@ export function ModalFormVisitante({
         )}
 
         {/* Como Chegou Até Nós com suporte a campo manual para Outros */}
-        <div className="space-y-1.5 text-left">
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+        <div className="space-y-1.5 text-left w-full">
+          <label className="block text-[clamp(0.68rem,2.2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
             Como chegou até nós?
           </label>
           <select
             value={opcaoComoChegou}
             onChange={(e) => setOpcaoComoChegou(e.target.value)}
-            className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370] transition-smooth"
+            className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370] transition-smooth box-border"
           >
             {OPCOES_COMO_CHEGOU.map((opcao) => (
               <option key={opcao} value={opcao}>
@@ -246,7 +246,7 @@ export function ModalFormVisitante({
               placeholder="Descreva como chegou até nós (ex: Convite do Lucas, Google, etc.)..."
               value={outroComoChegou}
               onChange={(e) => setOutroComoChegou(e.target.value)}
-              className="mt-2 block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 focus:outline-none focus:ring-2 focus:ring-[#1E3370] animate-fadeIn"
+              className="mt-2 block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370] animate-fadeIn box-border"
               required
               autoFocus
             />
@@ -254,31 +254,31 @@ export function ModalFormVisitante({
         </div>
 
         {/* Data da Visita */}
-        <div className="space-y-1.5 text-left">
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+        <div className="space-y-1.5 text-left w-full">
+          <label className="block text-[clamp(0.68rem,2.2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
             Data da Visita
           </label>
           <input
             type="date"
             value={dataVisita}
             onChange={(e) => setDataVisita(e.target.value)}
-            className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370]"
+            className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370] transition-smooth box-border"
           />
         </div>
 
         {/* Status de Contato - EXIBIDO APENAS NA EDIÇÃO */}
         {visitanteParaEditar && (
-          <div className="space-y-1.5 text-left">
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+          <div className="space-y-1.5 text-left w-full">
+            <label className="block text-[clamp(0.68rem,2.2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
               Status de Contato
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 w-full">
               <button
                 type="button"
                 onClick={() => setStatus('nao_contactado')}
-                className={`p-2.5 rounded-xl border text-xs font-semibold transition-smooth ${
+                className={`p-2.5 min-h-[44px] rounded-xl border text-xs font-bold transition-smooth flex items-center justify-center ${
                   status === 'nao_contactado'
-                    ? 'border-amber-500 bg-amber-50 text-amber-900 ring-1 ring-amber-500'
+                    ? 'border-amber-500 bg-amber-50 text-amber-900 ring-2 ring-amber-500 shadow-xs'
                     : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                 }`}
               >
@@ -287,9 +287,9 @@ export function ModalFormVisitante({
               <button
                 type="button"
                 onClick={() => setStatus('contactado')}
-                className={`p-2.5 rounded-xl border text-xs font-semibold transition-smooth ${
+                className={`p-2.5 min-h-[44px] rounded-xl border text-xs font-bold transition-smooth flex items-center justify-center ${
                   status === 'contactado'
-                    ? 'border-emerald-500 bg-emerald-50 text-emerald-900 ring-1 ring-emerald-500'
+                    ? 'border-emerald-500 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-500 shadow-xs'
                     : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                 }`}
               >
@@ -300,8 +300,8 @@ export function ModalFormVisitante({
         )}
 
         {/* Próxima Ação */}
-        <div className="space-y-1.5 text-left">
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+        <div className="space-y-1.5 text-left w-full">
+          <label className="block text-[clamp(0.68rem,2.2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
             Próxima Ação / Passo
           </label>
           <input
@@ -309,13 +309,13 @@ export function ModalFormVisitante({
             placeholder="Ex: Convidar para o PG, discipulado ou evento"
             value={proximaAcao}
             onChange={(e) => setProximaAcao(e.target.value)}
-            className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 focus:outline-none focus:ring-2 focus:ring-[#1E3370]"
+            className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370] transition-smooth box-border"
           />
         </div>
 
         {/* Observações */}
-        <div className="space-y-1.5 text-left">
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+        <div className="space-y-1.5 text-left w-full">
+          <label className="block text-[clamp(0.68rem,2.2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
             Observações
           </label>
           <textarea
@@ -323,16 +323,16 @@ export function ModalFormVisitante({
             placeholder="Informações adicionais, filhos, onde sentou, etc."
             value={observacoes}
             onChange={(e) => setObservacoes(e.target.value)}
-            className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 focus:outline-none focus:ring-2 focus:ring-[#1E3370]"
+            className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm p-3 min-h-[72px] focus:outline-none focus:ring-2 focus:ring-[#1E3370] transition-smooth resize-y box-border"
           />
         </div>
 
         {/* Botões de Ação */}
-        <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <Button type="button" variant="outline" onClick={onClose} disabled={salvando}>
+        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 w-full">
+          <Button type="button" variant="outline" onClick={onClose} disabled={salvando} className="flex-1 sm:flex-none">
             Cancelar
           </Button>
-          <Button type="submit" variant="primary" carregando={salvando}>
+          <Button type="submit" variant="primary" carregando={salvando} className="flex-1 sm:flex-none font-bold">
             {visitanteParaEditar ? 'Salvar Alterações' : 'Cadastrar Visitante'}
           </Button>
         </div>

@@ -191,24 +191,24 @@ export function ModalWhatsApp({
         </div>
 
         {/* Escolha do Momento (Segunda / Sexta / Personalizada) */}
-        <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+        <div className="space-y-1.5 w-full box-border">
+          <label className="block text-[clamp(0.68rem,2.2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
             Momento do Contato:
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 w-full">
             {/* Botão Segunda */}
             <button
               type="button"
               onClick={() => trocarMomento('segunda')}
               className={clsx(
-                'p-2.5 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-smooth',
+                'p-2 sm:p-2.5 min-h-[52px] rounded-xl border text-[clamp(0.65rem,2vw,0.75rem)] font-bold flex flex-col items-center justify-center gap-1 transition-smooth text-center box-border',
                 momentoSelecionado === 'segunda'
-                  ? 'border-[#1E3370] bg-indigo-50 text-[#1E3370] ring-1 ring-[#1E3370]'
+                  ? 'border-[#1E3370] bg-indigo-50 text-[#1E3370] ring-2 ring-[#1E3370] shadow-xs'
                   : 'border-slate-200 text-slate-600 hover:bg-slate-50'
               )}
             >
-              <Calendar className="w-4 h-4 text-[#1E3370]" />
-              <span>Segunda (Boas-Vindas)</span>
+              <Calendar className="w-3.5 h-3.5 text-[#1E3370] flex-shrink-0" />
+              <span>Segunda</span>
             </button>
 
             {/* Botão Sexta */}
@@ -216,14 +216,14 @@ export function ModalWhatsApp({
               type="button"
               onClick={() => trocarMomento('sexta')}
               className={clsx(
-                'p-2.5 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-smooth',
+                'p-2 sm:p-2.5 min-h-[52px] rounded-xl border text-[clamp(0.65rem,2vw,0.75rem)] font-bold flex flex-col items-center justify-center gap-1 transition-smooth text-center box-border',
                 momentoSelecionado === 'sexta'
-                  ? 'border-[#2563EB] bg-blue-50 text-[#2563EB] ring-1 ring-[#2563EB]'
+                  ? 'border-[#2563EB] bg-blue-50 text-[#2563EB] ring-2 ring-[#2563EB] shadow-xs'
                   : 'border-slate-200 text-slate-600 hover:bg-slate-50'
               )}
             >
-              <Sparkles className="w-4 h-4 text-[#2563EB]" />
-              <span>Sexta (Convite Culto)</span>
+              <Sparkles className="w-3.5 h-3.5 text-[#2563EB] flex-shrink-0" />
+              <span>Sexta</span>
             </button>
 
             {/* Botão Personalizada */}
@@ -231,13 +231,13 @@ export function ModalWhatsApp({
               type="button"
               onClick={() => trocarMomento('personalizada')}
               className={clsx(
-                'p-2.5 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-smooth',
+                'p-2 sm:p-2.5 min-h-[52px] rounded-xl border text-[clamp(0.65rem,2vw,0.75rem)] font-bold flex flex-col items-center justify-center gap-1 transition-smooth text-center box-border',
                 momentoSelecionado === 'personalizada'
-                  ? 'border-emerald-600 bg-emerald-50 text-emerald-800 ring-1 ring-emerald-600'
+                  ? 'border-emerald-600 bg-emerald-50 text-emerald-800 ring-2 ring-emerald-600 shadow-xs'
                   : 'border-slate-200 text-slate-600 hover:bg-slate-50'
               )}
             >
-              <Edit3 className="w-4 h-4 text-emerald-600" />
+              <Edit3 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
               <span>Personalizada</span>
             </button>
           </div>

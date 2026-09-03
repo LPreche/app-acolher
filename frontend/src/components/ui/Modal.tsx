@@ -42,39 +42,39 @@ export function Modal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
       {/* Overlay Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity animate-fade-in"
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-fade-in"
         onClick={onClose}
       />
 
-      {/* Modal / Bottom Sheet */}
+      {/* Modal Card */}
       <div
         className={clsx(
-          'relative w-full bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90vh] transition-transform animate-slide-up sm:animate-scale-up',
+          'relative w-full bg-white rounded-3xl shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90dvh] sm:max-h-[88vh] transition-all animate-scale-up box-border border border-slate-100/80 my-auto',
           tamanhoClasses[tamanho]
         )}
       >
-        {/* Handle bar para mobile touch */}
-        <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mt-3 sm:hidden" />
-
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100">
-          <div>
-            {titulo && <h3 className="text-lg font-bold text-slate-900">{titulo}</h3>}
-            {subtitulo && <p className="text-xs text-slate-500 mt-0.5">{subtitulo}</p>}
+        <div className="flex items-center justify-between px-4 sm:px-6 pt-4 pb-3.5 border-b border-slate-100 flex-shrink-0 bg-slate-50/50">
+          <div className="pr-2">
+            {titulo && <h3 className="text-[clamp(1rem,3.2vw,1.15rem)] font-bold text-slate-900 leading-tight">{titulo}</h3>}
+            {subtitulo && <p className="text-[clamp(0.7rem,2.4vw,0.78rem)] text-slate-500 mt-0.5 leading-snug">{subtitulo}</p>}
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
+            className="p-2 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 transition-colors flex-shrink-0"
+            title="Fechar modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Content Body */}
-        <div className="px-5 py-4 overflow-y-auto flex-1">{children}</div>
+        {/* Content Body com Scroll Suave e Padding Responsivo */}
+        <div className="px-4 sm:px-6 py-4 overflow-y-auto flex-1 w-full box-border">
+          {children}
+        </div>
       </div>
     </div>
   );

@@ -36,8 +36,8 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # Ajusta permissões de escrita para logs e cache
 RUN chmod -R 777 storage bootstrap/cache
 
-# Porta padrão (Render injeta a variável $PORT dinamicamente)
-EXPOSE 8000
+# Habilita múltiplos workers simultâneos para processar requisições concorrentes sem fila
+ENV PHP_CLI_SERVER_WORKERS=4
 
-# Executa o servidor Laravel na porta fornecida pelo Render
-CMD php artisan config:clear && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+# Executa o servidor Laravel otimizado na porta fornecida pelo Render
+CMD php artisan config:cache && php artisan route:cache && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}

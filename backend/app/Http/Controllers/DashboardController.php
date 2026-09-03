@@ -25,15 +25,24 @@ class DashboardController extends Controller
             $queryVisitantes->where('tipo_acolhimento', $segmento);
         }
 
-        $totalVisitantes = (clone $queryVisitantes)->count();
-        $totalNaoContactados = (clone $queryVisitantes)->where('status', StatusContatoEnum::NAO_CONTACTADO->value)->count();
-        $totalContactados = (clone $queryVisitantes)->where('status', StatusContatoEnum::CONTACTADO->value)->count();
+        // 1. Agregação em UMA ÚNICA consulta SQL para evitar múltiplos round-trips de rede
+        $agregados = (clone $queryVisitantes)
+            ->selectRaw("
+                COUNT(*) as total_visitantes,
+                COUNT(*) FILTER (WHERE status = 'nao_contactado') as total_nao_contactados,
+                COUNT(*) FILTER (WHERE status = 'contactado') as total_contactados
+            ")
+            ->first();
 
-        // Totais por segmento
-        $totalFamilia = Visitante::where('ativo', true)->where('tipo_acolhimento', TipoAcolhimentoEnum::FAMILIA->value)->count();
-        $totalVertical = Visitante::where('ativo', true)->where('tipo_acolhimento', TipoAcolhimentoEnum::VERTICAL->value)->count();
+        // 2. Totais por segmento em uma única consulta agregada
+        $totaisSegmentos = Visitante::where('ativo', true)
+            ->selectRaw("
+                COUNT(*) FILTER (WHERE tipo_acolhimento = 'familia') as total_familia,
+                COUNT(*) FILTER (WHERE tipo_acolhimento = 'vertical') as total_vertical
+            ")
+            ->first();
 
-        // Visitantes prioritários não contactados (top 5 para o dashboard)
+        // 3. Visitantes prioritários não contactados (top 5 para o dashboard)
         $prioritariosNaoContactados = (clone $queryVisitantes)
             ->where('status', StatusContatoEnum::NAO_CONTACTADO->value)
             ->orderByRaw('COALESCE(data_ultimo_contato::date, data_visita) ASC')
@@ -46,11 +55,11 @@ class DashboardController extends Controller
 
         return response()->json([
             'resumo' => [
-                'total_visitantes' => $totalVisitantes,
-                'total_nao_contactados' => $totalNaoContactados,
-                'total_contactados' => $totalContactados,
-                'total_familia' => $totalFamilia,
-                'total_vertical' => $totalVertical,
+                'total_visitantes' => (int) ($agregados->total_visitantes ?? 0),
+                'total_nao_contactados' => (int) ($agregados->total_nao_contactados ?? 0),
+                'total_contactados' => (int) ($agregados->total_contactados ?? 0),
+                'total_familia' => (int) ($totaisSegmentos->total_familia ?? 0),
+                'total_vertical' => (int) ($totaisSegmentos->total_vertical ?? 0),
                 'total_usuarios' => $totalUsuarios,
             ],
             'prioritarios' => VisitanteResource::collection($prioritariosNaoContactados),

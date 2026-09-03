@@ -20,7 +20,7 @@ class VisitanteController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $query = Visitante::query()->with(['responsavel', 'historicoContatos.usuario']);
+        $query = Visitante::query()->with(['responsavel']);
 
         // Filtro por status de atividade (padrão: ativos)
         if ($request->has('ativo')) {

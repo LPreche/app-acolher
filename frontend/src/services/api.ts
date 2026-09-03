@@ -76,8 +76,16 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
   }
 
   if (!response.ok) {
-    const errorMessage = data?.message || data?.mensagem || 'Ocorreu um erro na requisição.';
-    throw new ApiError(errorMessage, response.status, data);
+    let errorMessage = data?.mensagem || data?.message;
+
+    if (data?.errors && typeof data.errors === 'object') {
+      const firstKey = Object.keys(data.errors)[0];
+      if (firstKey && Array.isArray(data.errors[firstKey]) && data.errors[firstKey].length > 0) {
+        errorMessage = data.errors[firstKey][0];
+      }
+    }
+
+    throw new ApiError(errorMessage || 'Ocorreu um erro na requisição.', response.status, data);
   }
 
   return data as T;

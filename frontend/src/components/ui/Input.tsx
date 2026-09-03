@@ -35,7 +35,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               'block w-full max-w-full box-border rounded-xl border bg-white text-slate-900 text-sm transition-smooth',
               'placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1E3370] focus:border-transparent',
               'disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed',
-              'py-2.5 px-3.5 min-h-[44px]',
+              'h-11 min-h-[44px] max-h-11 px-3.5 py-2 box-border leading-normal',
               iconeEsquerda && 'pl-10',
               iconeDireita && 'pr-10',
               erro

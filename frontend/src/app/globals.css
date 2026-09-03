@@ -90,6 +90,42 @@ body {
   animation: pulse-urgent 2s infinite ease-in-out;
 }
 
+/* Padronização rigorosa e idêntica para inputs de data (Chrome, Safari, iOS, Android) */
+input[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  line-height: normal !important;
+  font-size: 0.875rem !important; /* 14px */
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  min-height: 1.25rem;
+  height: 1.25rem;
+  line-height: 1.25rem;
+  margin: 0;
+  padding: 0;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+  padding: 0;
+  margin: 0;
+  transition: opacity 0.2s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
 /* Ocultar badge e indicadores de desenvolvimento do Next.js */
 nextjs-portal,
 [data-nextjs-toast],

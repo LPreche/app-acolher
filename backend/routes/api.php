@@ -16,6 +16,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Rotas públicas
+Route::get('/login', function () {
+    return response()->json([
+        'status' => 'info',
+        'mensagem' => 'Este é o endpoint de autenticação da API. Para fazer login, envie uma requisição POST com usuario e password.',
+    ]);
+});
 Route::post('/login', [AuthController::class, 'login']);
 
 // Rotas autenticadas via Laravel Sanctum

@@ -33,14 +33,17 @@ class ContatoController extends Controller
 
         // Busca templates ativos no banco para o tipo de acolhimento do visitante ou 'ambos'
         $tipoAcolhimentoStr = $visitante->tipo_acolhimento?->value ?? 'familia';
-        $todosTemplates = TemplateMensagem::where('ativo', true)
+        $query = TemplateMensagem::where('ativo', true)
             ->where(function ($q) use ($tipoAcolhimentoStr) {
                 $q->where('tipo_acolhimento', $tipoAcolhimentoStr)
                   ->orWhere('tipo_acolhimento', 'ambos');
-            })
-            ->orderBy('ordem', 'asc')
-            ->orderBy('id', 'asc')
-            ->get();
+            });
+
+        if (Schema::hasColumn('templates_mensagens', 'ordem')) {
+            $query->orderBy('ordem', 'asc');
+        }
+
+        $todosTemplates = $query->orderBy('id', 'asc')->get();
 
         // Formata cada template com os dados do visitante
         $templatesFormatados = $todosTemplates->map(function ($template) use ($visitante, $usuario, $telefoneLimpo) {

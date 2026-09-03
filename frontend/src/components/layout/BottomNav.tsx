@@ -22,14 +22,14 @@ export function BottomNav({ onAbrirNovoVisitante }: BottomNavProps) {
     : `/painel/${contextoAtivo}`;
 
   const visitantesPath = contextoAtivo === 'admin'
-    ? '/admin'
+    ? '/admin/visitantes'
     : `/painel/${contextoAtivo}/visitantes`;
 
   const podeAlternar = (usuario.pode_acessar_familia && usuario.pode_acessar_vertical) || usuario.e_admin;
   const podeAcessarRelatorios = usuario.pode_acessar_relatorios || usuario.e_admin || usuario.e_lider;
 
   const eInicioAtivo = pathname === basePath;
-  const eVisitantesAtivo = pathname.startsWith(visitantesPath) && pathname !== '/admin';
+  const eVisitantesAtivo = pathname.startsWith(visitantesPath);
 
   return (
     <>

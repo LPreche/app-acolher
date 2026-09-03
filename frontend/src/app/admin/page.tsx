@@ -198,28 +198,18 @@ export default function AdminPage() {
           >
             Visão Geral
           </button>
-          <button
-            onClick={() => setAbaAtiva('visitantes')}
-            className={clsx(
-              'flex-1 py-2 rounded-xl transition-smooth text-center',
-              abaAtiva === 'visitantes'
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-            )}
+          <Link
+            href="/admin/visitantes"
+            className="flex-1 py-2 rounded-xl transition-smooth text-center text-slate-600 hover:text-slate-900 hover:bg-slate-50"
           >
             Visitantes ({visitantes.length})
-          </button>
-          <button
-            onClick={() => setAbaAtiva('usuarios')}
-            className={clsx(
-              'flex-1 py-2 rounded-xl transition-smooth text-center',
-              abaAtiva === 'usuarios'
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-            )}
+          </Link>
+          <Link
+            href="/admin/usuarios"
+            className="flex-1 py-2 rounded-xl transition-smooth text-center text-slate-600 hover:text-slate-900 hover:bg-slate-50"
           >
             Usuários ({usuarios.length})
-          </button>
+          </Link>
         </div>
 
         {/* Conteúdo da Aba: Visão Geral */}
@@ -227,10 +217,13 @@ export default function AdminPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Card Acolher Família */}
-              <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+              <Link
+                href="/admin/visitantes?segmento=familia"
+                className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3 hover:border-indigo-300 hover:shadow-md transition-all group block text-left"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="p-2 bg-indigo-50 text-[#1E3370] rounded-xl">
+                    <div className="p-2 bg-indigo-50 text-[#1E3370] rounded-xl group-hover:scale-105 transition-transform">
                       <Users className="w-5 h-5" />
                     </div>
                     <div>
@@ -248,13 +241,16 @@ export default function AdminPage() {
                     {metricas?.por_tipo?.familia?.nao_contactados ?? 0}
                   </span>
                 </div>
-              </div>
+              </Link>
 
               {/* Card Acolher Vertical */}
-              <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+              <Link
+                href="/admin/visitantes?segmento=vertical"
+                className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3 hover:border-blue-300 hover:shadow-md transition-all group block text-left"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="p-2 bg-blue-50 text-[#2563EB] rounded-xl">
+                    <div className="p-2 bg-blue-50 text-[#2563EB] rounded-xl group-hover:scale-105 transition-transform">
                       <IconeVertical className="w-5 h-5" />
                     </div>
                     <div>
@@ -272,7 +268,7 @@ export default function AdminPage() {
                     {metricas?.por_tipo?.vertical?.nao_contactados ?? 0}
                   </span>
                 </div>
-              </div>
+              </Link>
 
               {/* Card de Gestão de Modelos de Mensagens */}
               <Link

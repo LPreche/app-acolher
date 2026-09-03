@@ -16,15 +16,15 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
 
     return (
-      <div className="w-full space-y-1.5 text-left">
+      <div className="w-full max-w-full box-border space-y-1.5 text-left">
         {label && (
-          <label htmlFor={inputId} className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+          <label htmlFor={inputId} className="block text-[clamp(0.68rem,2.2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
             {label}
           </label>
         )}
-        <div className="relative rounded-xl shadow-sm">
+        <div className="relative w-full max-w-full rounded-xl shadow-xs box-border">
           {iconeEsquerda && (
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 flex-shrink-0">
               {iconeEsquerda}
             </div>
           )}
@@ -32,7 +32,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             ref={ref}
             className={clsx(
-              'block w-full rounded-xl border bg-white text-slate-900 text-sm transition-smooth',
+              'block w-full max-w-full box-border rounded-xl border bg-white text-slate-900 text-sm transition-smooth',
               'placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1E3370] focus:border-transparent',
               'disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed',
               'py-2.5 px-3.5 min-h-[44px]',
@@ -46,7 +46,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {iconeDireita && (
-            <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+            <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 flex-shrink-0">
               {iconeDireita}
             </div>
           )}

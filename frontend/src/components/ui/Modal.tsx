@@ -52,15 +52,15 @@ export function Modal({
       {/* Modal Card */}
       <div
         className={clsx(
-          'relative w-full bg-white rounded-3xl shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90dvh] sm:max-h-[88vh] transition-all animate-scale-up box-border border border-slate-100/80 my-auto',
+          'relative w-full max-w-[calc(100vw-1.5rem)] bg-white rounded-3xl shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90dvh] sm:max-h-[88vh] transition-all animate-scale-up box-border border border-slate-100/80 my-auto',
           tamanhoClasses[tamanho]
         )}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 pt-4 pb-3.5 border-b border-slate-100 flex-shrink-0 bg-slate-50/50">
-          <div className="pr-2">
-            {titulo && <h3 className="text-[clamp(1rem,3.2vw,1.15rem)] font-bold text-slate-900 leading-tight">{titulo}</h3>}
-            {subtitulo && <p className="text-[clamp(0.7rem,2.4vw,0.78rem)] text-slate-500 mt-0.5 leading-snug">{subtitulo}</p>}
+          <div className="pr-2 min-w-0">
+            {titulo && <h3 className="text-[clamp(1rem,3.2vw,1.15rem)] font-bold text-slate-900 leading-tight truncate">{titulo}</h3>}
+            {subtitulo && <p className="text-[clamp(0.7rem,2.4vw,0.78rem)] text-slate-500 mt-0.5 leading-snug line-clamp-2">{subtitulo}</p>}
           </div>
           <button
             onClick={onClose}
@@ -72,7 +72,7 @@ export function Modal({
         </div>
 
         {/* Content Body com Scroll Suave e Padding Responsivo */}
-        <div className="px-4 sm:px-6 py-4 overflow-y-auto flex-1 w-full box-border">
+        <div className="px-4 sm:px-6 py-4 overflow-y-auto overflow-x-hidden flex-1 w-full max-w-full box-border">
           {children}
         </div>
       </div>

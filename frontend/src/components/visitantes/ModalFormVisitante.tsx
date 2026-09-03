@@ -241,30 +241,25 @@ export function ModalFormVisitante({
 
           {/* Campo aberto manual caso selecione "Outros" */}
           {opcaoComoChegou === 'Outros' && (
-            <input
-              type="text"
-              placeholder="Descreva como chegou até nós (ex: Convite do Lucas, Google, etc.)..."
-              value={outroComoChegou}
-              onChange={(e) => setOutroComoChegou(e.target.value)}
-              className="mt-2 block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370] animate-fadeIn box-border"
-              required
-              autoFocus
-            />
+            <div className="mt-2 w-full max-w-full">
+              <Input
+                placeholder="Descreva como chegou até nós (ex: Convite do Lucas, Google, etc.)..."
+                value={outroComoChegou}
+                onChange={(e) => setOutroComoChegou(e.target.value)}
+                required
+                autoFocus
+              />
+            </div>
           )}
         </div>
 
         {/* Data da Visita */}
-        <div className="space-y-1.5 text-left w-full">
-          <label className="block text-[clamp(0.68rem,2.2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
-            Data da Visita
-          </label>
-          <input
-            type="date"
-            value={dataVisita}
-            onChange={(e) => setDataVisita(e.target.value)}
-            className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370] transition-smooth box-border"
-          />
-        </div>
+        <Input
+          label="Data da Visita"
+          type="date"
+          value={dataVisita}
+          onChange={(e) => setDataVisita(e.target.value)}
+        />
 
         {/* Status de Contato - EXIBIDO APENAS NA EDIÇÃO */}
         {visitanteParaEditar && (
@@ -300,18 +295,12 @@ export function ModalFormVisitante({
         )}
 
         {/* Próxima Ação */}
-        <div className="space-y-1.5 text-left w-full">
-          <label className="block text-[clamp(0.68rem,2.2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
-            Próxima Ação / Passo
-          </label>
-          <input
-            type="text"
-            placeholder="Ex: Convidar para o PG, discipulado ou evento"
-            value={proximaAcao}
-            onChange={(e) => setProximaAcao(e.target.value)}
-            className="block w-full rounded-xl border border-slate-300 bg-white text-slate-900 text-sm py-2.5 px-3.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#1E3370] transition-smooth box-border"
-          />
-        </div>
+        <Input
+          label="Próxima Ação / Passo"
+          placeholder="Ex: Convidar para o PG, discipulado ou evento"
+          value={proximaAcao}
+          onChange={(e) => setProximaAcao(e.target.value)}
+        />
 
         {/* Observações */}
         <div className="space-y-1.5 text-left w-full">

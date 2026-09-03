@@ -1,0 +1,11 @@
+vendor/
+.env
+.env.*
+!.env.example
+storage/logs/*.log
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+.git
+.github
+.phpunit.cache

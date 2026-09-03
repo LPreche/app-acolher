@@ -41,6 +41,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="theme-color" content="#1E3370" />
         <link rel="icon" href="/logo-acolher.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.jpg" />
       </head>

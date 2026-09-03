@@ -1,0 +1,17 @@
+{
+  "name": "Acolher - IBI Chapecó",
+  "short_name": "Acolher",
+  "description": "Sistema de registro e acompanhamento caloroso de visitantes nos cultos.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1E3370",
+  "icons": [
+    {
+      "src": "/logo-acolher.jpg",
+      "sizes": "192x192 512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

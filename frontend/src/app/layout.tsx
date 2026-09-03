@@ -5,9 +5,22 @@ import { ContextSelectorModal } from '@/components/layout/ContextSelectorModal';
 
 export const metadata: Metadata = {
   title: 'Acolher - IBI Chapecó',
-  description: 'Sistema de recepção, registro e acompanhamento de visitantes da Igreja Batista Independente em Chapecó.',
+  description: 'Sistema de recepção, registro e acompanhamento caloroso de visitantes nos cultos da Igreja Batista Independente em Chapecó.',
+  manifest: '/manifest.json',
   icons: {
-    icon: '/logo-acolher.jpg',
+    icon: [
+      { url: '/logo-acolher.jpg', type: 'image/jpeg' },
+      { url: '/icon.jpg', type: 'image/jpeg' },
+    ],
+    shortcut: ['/logo-acolher.jpg'],
+    apple: [
+      { url: '/apple-touch-icon.jpg', sizes: '180x180', type: 'image/jpeg' },
+    ],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Acolher',
   },
 };
 
@@ -27,6 +40,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
+      <head>
+        <link rel="icon" href="/logo-acolher.jpg" type="image/jpeg" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.jpg" />
+      </head>
       <body className="min-h-screen bg-slate-50 text-slate-900 selection:bg-[#1E3370] selection:text-white">
         <AuthProvider>
           {children}

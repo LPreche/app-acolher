@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
-const BACKEND_INTERNAL_URL = process.env.BACKEND_INTERNAL_URL || 'http://127.0.0.1:8000';
+const BACKEND_URL =
+  process.env.BACKEND_INTERNAL_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  'https://app-acolher.onrender.com';
 
 const nextConfig: NextConfig = {
   devIndicators: false,
@@ -15,7 +18,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: `${BACKEND_INTERNAL_URL}/api/:path*`,
+        destination: `${BACKEND_URL}/api/:path*`,
       },
     ];
   },

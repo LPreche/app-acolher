@@ -1,18 +1,24 @@
 function getApiBaseUrl(): string {
-  const url =
+  // 1. Variável de ambiente configurada
+  const envUrl =
     process.env.NEXT_PUBLIC_API_URL ||
     process.env.NEXT_PUBLIC_API_URL_FRONT ||
     process.env.API_URL_FRONT;
 
-  if (url) {
-    return url.endsWith('/') ? url.slice(0, -1) : url;
+  if (envUrl) {
+    return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
   }
-  // No navegador (seja ngrok, celular ou localhost), usa a rota relativa '/api'
-  // O Next.js se encarrega de repassar diretamente ao Laravel local na porta 8000
+
+  // 2. Ambiente local de desenvolvimento no navegador
   if (typeof window !== 'undefined') {
-    return '/api';
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return '/api';
+    }
   }
-  return 'http://127.0.0.1:8000/api';
+
+  // 3. Produção (Vercel): Aponta direto para o backend no Render
+  return 'https://app-acolher.onrender.com/api';
 }
 
 export class ApiError extends Error {

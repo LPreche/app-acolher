@@ -26,48 +26,58 @@ class ContatoController extends Controller
         $usuario = $request->user();
 
         // Normalização de telefone para o formato internacional (55...)
-        $telefoneLimpo = preg_replace('/[^\d]/', '', $visitante->whatsapp);
+        $telefoneLimpo = preg_replace('/[^\d]/', '', (string) $visitante->whatsapp);
         if (strlen($telefoneLimpo) === 10 || strlen($telefoneLimpo) === 11) {
             $telefoneLimpo = '55' . $telefoneLimpo;
         }
 
-        // Busca templates ativos no banco para o tipo de acolhimento do visitante ou 'ambos'
-        $tipoAcolhimentoStr = $visitante->tipo_acolhimento?->value ?? 'familia';
-        $query = TemplateMensagem::where('ativo', true)
-            ->where(function ($q) use ($tipoAcolhimentoStr) {
-                $q->where('tipo_acolhimento', $tipoAcolhimentoStr)
-                  ->orWhere('tipo_acolhimento', 'ambos');
-            });
-
-        if (Schema::hasColumn('templates_mensagens', 'ordem')) {
-            $query->orderBy('ordem', 'asc');
-        }
-
-        $todosTemplates = $query->orderBy('id', 'asc')->get();
-
-        // Formata cada template com os dados do visitante
-        $templatesFormatados = $todosTemplates->map(function ($template) use ($visitante, $usuario, $telefoneLimpo) {
-            $texto = $template->formatarMensagem($visitante, $usuario);
-            return [
-                'id' => $template->id,
-                'titulo' => $template->titulo,
-                'momento' => $template->momento,
-                'tipo_acolhimento' => $template->tipo_acolhimento,
-                'descricao' => $template->descricao,
-                'texto' => $texto,
-                'link_whatsapp' => 'https://api.whatsapp.com/send?phone=' . $telefoneLimpo . '&text=' . urlencode($texto),
-            ];
-        });
-
-        // Templates fallback caso o banco não tenha templates cadastrados
-        $nomeVisitante = $visitante->nome;
-        $nomeUsuario = $usuario ? $usuario->nome : 'Equipe Acolher';
+        $nomeVisitante = explode(' ', trim($visitante->nome))[0] ?? $visitante->nome;
+        $nomeUsuario = $usuario ? $usuario->nome : ($visitante->responsavel?->nome ?? 'Equipe Acolher');
 
         $textoSegundaPadrao = $visitante->tipo_acolhimento === TipoAcolhimentoEnum::VERTICAL
             ? "Oie, {$nomeVisitante}, tudo bem? 😊 Meu nome é {$nomeUsuario}, sou da IBI Chapecó. Muito legal a tua presença no Culto Vertical!"
             : "Bom dia, {$nomeVisitante}, tudo bem?\nMeu nome é {$nomeUsuario}, sou da IBI Chapecó. Foi um prazer receber você e sua família neste domingo.\nDesejo que Deus abençoe a sua semana!";
 
         $textoSextaPadrao = "Olá {$nomeVisitante}, tudo bem? Passando para te desejar um abençoado final de semana! Neste domingo teremos nosso culto na IBI Chapecó e seria uma alegria imensa ter você conosco novamente. Posso te esperar?";
+
+        try {
+            // Busca templates ativos no banco para o tipo de acolhimento do visitante ou 'ambos'
+            $tipoAcolhimentoStr = $visitante->tipo_acolhimento?->value ?? 'familia';
+            $query = TemplateMensagem::where('ativo', true)
+                ->where(function ($q) use ($tipoAcolhimentoStr) {
+                    $q->where('tipo_acolhimento', $tipoAcolhimentoStr)
+                      ->orWhere('tipo_acolhimento', 'ambos');
+                });
+
+            if (Schema::hasColumn('templates_mensagens', 'ordem')) {
+                $query->orderBy('ordem', 'asc');
+            }
+
+            $todosTemplates = $query->orderBy('id', 'asc')->get();
+
+            // Formata cada template com os dados do visitante
+            $templatesFormatados = $todosTemplates->map(function ($template) use ($visitante, $usuario, $telefoneLimpo) {
+                $texto = $template->formatarMensagem($visitante, $usuario);
+                return [
+                    'id' => $template->id,
+                    'titulo' => $template->titulo,
+                    'momento' => $template->momento,
+                    'tipo_acolhimento' => $template->tipo_acolhimento,
+                    'descricao' => $template->descricao,
+                    'texto' => $texto,
+                    'link_whatsapp' => 'https://api.whatsapp.com/send?phone=' . $telefoneLimpo . '&text=' . urlencode($texto),
+                ];
+            });
+
+            $segunda = $templatesFormatados->where('momento', 'segunda')->values();
+            $sexta = $templatesFormatados->where('momento', 'sexta')->values();
+            $geral = $templatesFormatados->where('momento', 'geral')->values();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Erro ao processar templates no ContatoController: ' . $e->getMessage());
+            $segunda = collect([]);
+            $sexta = collect([]);
+            $geral = collect([]);
+        }
 
         return response()->json([
             'visitante' => [
@@ -81,9 +91,9 @@ class ContatoController extends Controller
                 'data_contato_sexta' => $visitante->data_contato_sexta ? $visitante->data_contato_sexta->format('d/m/Y') : null,
             ],
             'telefone_normalizado' => $telefoneLimpo,
-            'templates_segunda' => $templatesFormatados->where('momento', 'segunda')->values(),
-            'templates_sexta' => $templatesFormatados->where('momento', 'sexta')->values(),
-            'templates_geral' => $templatesFormatados->where('momento', 'geral')->values(),
+            'templates_segunda' => $segunda,
+            'templates_sexta' => $sexta,
+            'templates_geral' => $geral,
             'fallback_segunda' => [
                 'texto' => $textoSegundaPadrao,
                 'link_whatsapp' => 'https://api.whatsapp.com/send?phone=' . $telefoneLimpo . '&text=' . urlencode($textoSegundaPadrao),

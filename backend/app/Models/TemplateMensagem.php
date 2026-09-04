@@ -33,11 +33,24 @@ class TemplateMensagem extends Model
     {
         $nomeResponsavel = $usuario?->nome ?? $visitante->responsavel?->nome ?? 'Equipe de Acolhimento';
 
+        $dataVisitaFormatada = 'no último culto';
+        if ($visitante->data_visita) {
+            if ($visitante->data_visita instanceof \DateTimeInterface) {
+                $dataVisitaFormatada = $visitante->data_visita->format('d/m/Y');
+            } else {
+                $time = strtotime((string) $visitante->data_visita);
+                $dataVisitaFormatada = $time ? date('d/m/Y', $time) : (string) $visitante->data_visita;
+            }
+        }
+
+        $primeiroNome = explode(' ', trim($visitante->nome))[0] ?? $visitante->nome;
+
         $substituicoes = [
-            '{nome}' => $visitante->nome,
+            '{nome}' => $primeiroNome,
+            '{nome_completo}' => $visitante->nome,
             '{responsavel}' => $nomeResponsavel,
             '{como_chegou}' => $visitante->como_chegou ?? 'nossa igreja',
-            '{data_visita}' => $visitante->data_visita ? date('d/m/Y', strtotime($visitante->data_visita)) : 'no último culto',
+            '{data_visita}' => $dataVisitaFormatada,
         ];
 
         return str_replace(

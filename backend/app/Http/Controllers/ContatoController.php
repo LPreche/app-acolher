@@ -44,8 +44,14 @@ class ContatoController extends Controller
         $textoSextaPadrao = "Olá {$nomeVisitante}, tudo bem? Passando para te desejar um abençoado final de semana! Neste domingo teremos nosso culto na IBI Chapecó e seria uma alegria imensa ter você conosco novamente. Posso te esperar?";
 
         try {
-            // Busca TODOS os templates ativos para permitir a escolha de qualquer opção cadastrada
-            $query = TemplateMensagem::where('ativo', true);
+            // Busca estritamente apenas os templates específicos do tipo de acolhimento do visitante ou 'ambos'
+            $tipoAcolhimentoStr = $visitante->tipo_acolhimento?->value ?? (is_string($visitante->tipo_acolhimento) ? $visitante->tipo_acolhimento : 'familia');
+
+            $query = TemplateMensagem::where('ativo', true)
+                ->where(function ($q) use ($tipoAcolhimentoStr) {
+                    $q->where('tipo_acolhimento', $tipoAcolhimentoStr)
+                      ->orWhere('tipo_acolhimento', 'ambos');
+                });
 
             if (Schema::hasColumn('templates_mensagens', 'ordem')) {
                 $query->orderBy('ordem', 'asc');

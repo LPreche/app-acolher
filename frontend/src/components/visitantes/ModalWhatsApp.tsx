@@ -52,16 +52,25 @@ export function ModalWhatsApp({
       const res = await visitanteService.obterTemplatesContato(visitanteId);
       setTemplatesData(res);
 
+      const tipo = visitante?.tipo_acolhimento;
+      const filtrar = (lista: TemplateMensagemItem[]) =>
+        lista.filter(
+          (t) => !t.tipo_acolhimento || t.tipo_acolhimento === 'ambos' || t.tipo_acolhimento === tipo
+        );
+
+      const listaSexta = filtrar(res.templates_sexta);
+      const listaSegunda = filtrar(res.templates_segunda);
+
       // Define o texto inicial baseado no momento
       const isSexta = visitante?.contato_segunda_enviado && !visitante?.contato_sexta_enviado;
-      if (isSexta && res.templates_sexta.length > 0) {
-        setTemplateAtivoId(res.templates_sexta[0].id || 'sexta_0');
-        setMensagemTexto(res.templates_sexta[0].texto);
-      } else if (res.templates_segunda.length > 0) {
-        setTemplateAtivoId(res.templates_segunda[0].id || 'segunda_0');
-        setMensagemTexto(res.templates_segunda[0].texto);
+      if (isSexta && listaSexta.length > 0) {
+        setTemplateAtivoId(listaSexta[0].id || 'sexta_0');
+        setMensagemTexto(listaSexta[0].texto);
+      } else if (listaSegunda.length > 0) {
+        setTemplateAtivoId(listaSegunda[0].id || 'segunda_0');
+        setMensagemTexto(listaSegunda[0].texto);
       } else {
-        setMensagemTexto(res.fallback_segunda.texto);
+        setMensagemTexto(isSexta ? res.fallback_sexta.texto : res.fallback_segunda.texto);
       }
     } catch (err: any) {
       setErro('Não foi possível carregar os templates de mensagem.');
@@ -70,13 +79,31 @@ export function ModalWhatsApp({
     }
   };
 
+  // Filtra estritamente os templates exibidos para o tipo de acolhimento do visitante
+  const templatesFiltrados = React.useMemo(() => {
+    if (!templatesData || !visitante) {
+      return { segunda: [], sexta: [] };
+    }
+    const tipo = visitante.tipo_acolhimento;
+
+    const filtrar = (lista: TemplateMensagemItem[]) =>
+      lista.filter(
+        (t) => !t.tipo_acolhimento || t.tipo_acolhimento === 'ambos' || t.tipo_acolhimento === tipo
+      );
+
+    return {
+      segunda: filtrar(templatesData.templates_segunda),
+      sexta: filtrar(templatesData.templates_sexta),
+    };
+  }, [templatesData, visitante]);
+
   // Alterna momento (Segunda vs Sexta vs Personalizada)
   const trocarMomento = (momento: 'segunda' | 'sexta' | 'personalizada') => {
     setMomentoSelecionado(momento);
     if (!templatesData) return;
 
     if (momento === 'segunda') {
-      const primeiro = templatesData.templates_segunda[0];
+      const primeiro = templatesFiltrados.segunda[0];
       if (primeiro) {
         setTemplateAtivoId(primeiro.id || 'segunda_0');
         setMensagemTexto(primeiro.texto);
@@ -84,7 +111,7 @@ export function ModalWhatsApp({
         setMensagemTexto(templatesData.fallback_segunda.texto);
       }
     } else if (momento === 'sexta') {
-      const primeiro = templatesData.templates_sexta[0];
+      const primeiro = templatesFiltrados.sexta[0];
       if (primeiro) {
         setTemplateAtivoId(primeiro.id || 'sexta_0');
         setMensagemTexto(primeiro.texto);
@@ -252,15 +279,15 @@ export function ModalWhatsApp({
               </label>
               <span className="text-[11px] text-slate-400 font-medium">
                 {momentoSelecionado === 'segunda'
-                  ? `${templatesData.templates_segunda.length} opções disponíveis`
-                  : `${templatesData.templates_sexta.length} opções disponíveis`}
+                  ? `${templatesFiltrados.segunda.length} opções disponíveis`
+                  : `${templatesFiltrados.sexta.length} opções disponíveis`}
               </span>
             </div>
 
             <div className="grid grid-cols-1 gap-2 max-h-56 overflow-y-auto pr-1">
               {(momentoSelecionado === 'segunda'
-                ? templatesData.templates_segunda
-                : templatesData.templates_sexta
+                ? templatesFiltrados.segunda
+                : templatesFiltrados.sexta
               ).map((t) => {
                 const isSelected = templateAtivoId === t.id;
                 return (

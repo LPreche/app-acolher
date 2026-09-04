@@ -62,6 +62,8 @@ export interface TemplateMensagemItem {
   id?: number;
   titulo: string;
   momento?: 'segunda' | 'sexta' | 'geral';
+  tipo_acolhimento?: string;
+  tipo_acolhimento_rotulo?: string;
   texto: string;
   link_whatsapp: string;
   descricao?: string | null;

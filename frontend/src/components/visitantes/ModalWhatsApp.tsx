@@ -243,61 +243,82 @@ export function ModalWhatsApp({
           </div>
         </div>
 
-        {/* Variações Dinâmicas para o Momento Selecionado */}
-        {templatesData && momentoSelecionado === 'segunda' && templatesData.templates_segunda.length > 1 && (
-          <div className="space-y-1.5 pt-1">
-            <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-              Modelos de Segunda-feira:
-            </label>
-            <div className="flex items-center gap-2 overflow-x-auto pb-1">
-              {templatesData.templates_segunda.map((t) => (
-                <button
-                  key={t.id || t.titulo}
-                  type="button"
-                  onClick={() => selecionarTemplateItem(t)}
-                  className={clsx(
-                    'px-3 py-1.5 rounded-xl border text-xs font-medium whitespace-nowrap transition-smooth',
-                    templateAtivoId === t.id
-                      ? 'border-[#1E3370] bg-[#1E3370] text-white shadow-sm'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                  )}
-                >
-                  {t.titulo}
-                </button>
-              ))}
+        {/* Lista de Opções de Modelos Disponíveis para o Momento */}
+        {templatesData && momentoSelecionado !== 'personalizada' && (
+          <div className="space-y-2 pt-1">
+            <div className="flex items-center justify-between">
+              <label className="block text-[clamp(0.68rem,2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
+                Selecione o Modelo de Mensagem:
+              </label>
+              <span className="text-[11px] text-slate-400 font-medium">
+                {momentoSelecionado === 'segunda'
+                  ? `${templatesData.templates_segunda.length} opções disponíveis`
+                  : `${templatesData.templates_sexta.length} opções disponíveis`}
+              </span>
             </div>
-          </div>
-        )}
 
-        {templatesData && momentoSelecionado === 'sexta' && templatesData.templates_sexta.length > 0 && (
-          <div className="space-y-1.5 pt-1">
-            <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-              Variações de Mensagem para Sexta-feira:
-            </label>
-            <div className="flex flex-col gap-1.5 max-h-44 overflow-y-auto pr-1">
-              {templatesData.templates_sexta.map((t) => (
-                <button
-                  key={t.id || t.titulo}
-                  type="button"
-                  onClick={() => selecionarTemplateItem(t)}
-                  className={clsx(
-                    'p-2.5 rounded-xl border text-left text-xs transition-smooth flex items-start justify-between gap-2',
-                    templateAtivoId === t.id
-                      ? 'border-[#2563EB] bg-blue-50/80 text-blue-950 ring-1 ring-[#2563EB]'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                  )}
-                >
-                  <div>
-                    <p className="font-bold text-slate-900">{t.titulo}</p>
-                    {t.descricao && (
-                      <p className="text-[11px] text-slate-500 mt-0.5">{t.descricao}</p>
+            <div className="grid grid-cols-1 gap-2 max-h-56 overflow-y-auto pr-1">
+              {(momentoSelecionado === 'segunda'
+                ? templatesData.templates_segunda
+                : templatesData.templates_sexta
+              ).map((t) => {
+                const isSelected = templateAtivoId === t.id;
+                return (
+                  <button
+                    key={t.id || t.titulo}
+                    type="button"
+                    onClick={() => selecionarTemplateItem(t)}
+                    className={clsx(
+                      'p-3 rounded-2xl border text-left transition-smooth flex items-start justify-between gap-2.5 box-border cursor-pointer',
+                      isSelected
+                        ? 'border-[#1E3370] bg-blue-50/70 ring-2 ring-[#1E3370] shadow-xs'
+                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70'
                     )}
-                  </div>
-                  {templateAtivoId === t.id && (
-                    <CheckCircle2 className="w-4 h-4 text-[#2563EB] flex-shrink-0 mt-0.5" />
-                  )}
-                </button>
-              ))}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="font-bold text-slate-900 text-xs sm:text-sm">
+                          {t.titulo}
+                        </span>
+                        {t.tipo_acolhimento === 'vertical' ? (
+                          <span className="inline-flex items-center gap-1 bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                            Vertical
+                          </span>
+                        ) : t.tipo_acolhimento === 'familia' ? (
+                          <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                            Família
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-semibold px-1.5 py-0.5 rounded-md">
+                            Ambos
+                          </span>
+                        )}
+                      </div>
+                      {t.descricao && (
+                        <p className="text-[11px] text-slate-500 line-clamp-1 mb-1">
+                          {t.descricao}
+                        </p>
+                      )}
+                      <p className="text-[11px] text-slate-600 line-clamp-2 bg-slate-50/90 p-1.5 rounded-lg border border-slate-100/80 italic">
+                        "{t.texto}"
+                      </p>
+                    </div>
+
+                    <div className="flex-shrink-0 pt-0.5">
+                      <div
+                        className={clsx(
+                          'w-5 h-5 rounded-full flex items-center justify-center border transition-all',
+                          isSelected
+                            ? 'bg-[#1E3370] border-[#1E3370] text-white shadow-xs'
+                            : 'border-slate-300 bg-white'
+                        )}
+                      >
+                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}

@@ -14,12 +14,15 @@ use App\Services\AuditoriaService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 
 class ContatoController extends Controller
 {
     /**
-     * Retorna os templates de mensagens organizados por momento (Segunda, Sexta, Geral)
-     * com links prontos para o WhatsApp do visitante.
+     * Retorna todos os templates de mensagens disponíveis (Segunda, Sexta, Geral)
+     * para que o usuário possa escolher a melhor opção com links prontos para o WhatsApp.
      */
     public function obterTemplates(Request $request, Visitante $visitante): JsonResponse
     {
@@ -41,13 +44,8 @@ class ContatoController extends Controller
         $textoSextaPadrao = "Olá {$nomeVisitante}, tudo bem? Passando para te desejar um abençoado final de semana! Neste domingo teremos nosso culto na IBI Chapecó e seria uma alegria imensa ter você conosco novamente. Posso te esperar?";
 
         try {
-            // Busca templates ativos no banco para o tipo de acolhimento do visitante ou 'ambos'
-            $tipoAcolhimentoStr = $visitante->tipo_acolhimento?->value ?? 'familia';
-            $query = TemplateMensagem::where('ativo', true)
-                ->where(function ($q) use ($tipoAcolhimentoStr) {
-                    $q->where('tipo_acolhimento', $tipoAcolhimentoStr)
-                      ->orWhere('tipo_acolhimento', 'ambos');
-                });
+            // Busca TODOS os templates ativos para permitir a escolha de qualquer opção cadastrada
+            $query = TemplateMensagem::where('ativo', true);
 
             if (Schema::hasColumn('templates_mensagens', 'ordem')) {
                 $query->orderBy('ordem', 'asc');
@@ -58,11 +56,18 @@ class ContatoController extends Controller
             // Formata cada template com os dados do visitante
             $templatesFormatados = $todosTemplates->map(function ($template) use ($visitante, $usuario, $telefoneLimpo) {
                 $texto = $template->formatarMensagem($visitante, $usuario);
+                $tipoRotulo = match ($template->tipo_acolhimento) {
+                    'vertical' => 'Vertical',
+                    'familia' => 'Família',
+                    default => 'Geral'
+                };
+
                 return [
                     'id' => $template->id,
                     'titulo' => $template->titulo,
                     'momento' => $template->momento,
                     'tipo_acolhimento' => $template->tipo_acolhimento,
+                    'tipo_acolhimento_rotulo' => $tipoRotulo,
                     'descricao' => $template->descricao,
                     'texto' => $texto,
                     'link_whatsapp' => 'https://api.whatsapp.com/send?phone=' . $telefoneLimpo . '&text=' . urlencode($texto),
@@ -73,7 +78,7 @@ class ContatoController extends Controller
             $sexta = $templatesFormatados->where('momento', 'sexta')->values();
             $geral = $templatesFormatados->where('momento', 'geral')->values();
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Erro ao processar templates no ContatoController: ' . $e->getMessage());
+            Log::error('Erro ao processar templates no ContatoController: ' . $e->getMessage());
             $segunda = collect([]);
             $sexta = collect([]);
             $geral = collect([]);
@@ -111,60 +116,123 @@ class ContatoController extends Controller
      */
     public function registrar(RegistrarContatoRequest $request, Visitante $visitante): JsonResponse
     {
-        $usuario = $request->user();
-        $dados = $request->validated();
-        $momento = $dados['momento'] ?? null;
-        $tipoMensagem = $dados['tipo_mensagem'];
+        try {
+            $this->garantirTabelaHistorico();
 
-        // 1. Cria o registro no histórico de contatos
-        $historico = HistoricoContato::create([
-            'visitante_id' => $visitante->id,
-            'usuario_id' => $usuario->id,
-            'tipo_mensagem' => $tipoMensagem->value ?? $tipoMensagem,
-            'mensagem' => $dados['mensagem'],
-        ]);
+            $usuario = $request->user();
+            $dados = $request->validated();
+            $momento = $dados['momento'] ?? null;
+            $tipoMensagem = $dados['tipo_mensagem'];
 
-        // 2. Atualiza a etapa específica de Segunda ou Sexta
-        if ($momento === 'segunda' || $tipoMensagem === TipoMensagemEnum::SEGUNDA || in_array($tipoMensagem, [TipoMensagemEnum::PADRAO_FAMILIA, TipoMensagemEnum::PADRAO_VERTICAL])) {
-            $visitante->contato_segunda_enviado = true;
-            $visitante->data_contato_segunda = Carbon::now();
-        }
+            $statusAnterior = $visitante->status?->value ?? 'nao_contactado';
+            $statusNovo = StatusContatoEnum::CONTACTADO->value;
 
-        if ($momento === 'sexta' || $tipoMensagem === TipoMensagemEnum::SEXTA) {
-            $visitante->contato_sexta_enviado = true;
-            $visitante->data_contato_sexta = Carbon::now();
-        }
-
-        // 3. Atualiza o status geral para Contactado
-        $visitante->status = StatusContatoEnum::CONTACTADO;
-        $visitante->data_ultimo_contato = Carbon::now();
-        $visitante->save();
-
-        $visitante->load(['responsavel', 'historicoContatos.usuario']);
-
-        // Normalização do telefone para retorno do link
-        $telefoneLimpo = preg_replace('/[^\d]/', '', $visitante->whatsapp);
-        if (strlen($telefoneLimpo) === 10 || strlen($telefoneLimpo) === 11) {
-            $telefoneLimpo = '55' . $telefoneLimpo;
-        }
-        $linkWhatsApp = 'https://api.whatsapp.com/send?phone=' . $telefoneLimpo . '&text=' . urlencode($dados['mensagem']);
-
-        AuditoriaService::registrar(
-            evento: 'contato_whatsapp_registrado',
-            descricao: "Registrou contato ({$momento}) com o visitante '{$visitante->nome}'",
-            usuario: $usuario,
-            dados: [
+            // 1. Cria o registro no histórico de contatos compatível com qualquer variação de colunas
+            $dadosHistorico = [
                 'visitante_id' => $visitante->id,
-                'momento' => $momento,
+                'usuario_id' => $usuario->id,
                 'tipo_mensagem' => $tipoMensagem->value ?? $tipoMensagem,
-            ],
-            request: $request
-        );
+                'mensagem' => $dados['mensagem'],
+                'mensagem_enviada' => $dados['mensagem'],
+                'status_anterior' => $statusAnterior,
+                'status_novo' => $statusNovo,
+                'tipo_contato' => 'whatsapp',
+                'data_contato' => Carbon::now(),
+            ];
 
-        return response()->json([
-            'mensagem' => 'Contato registrado com sucesso!',
-            'link_whatsapp' => $linkWhatsApp,
-            'visitante' => new VisitanteResource($visitante),
-        ]);
+            // Filtra dinamicamente para incluir somente colunas físicas existentes
+            $dadosFiltrados = [];
+            foreach ($dadosHistorico as $col => $val) {
+                if (Schema::hasColumn('historico_contatos', $col)) {
+                    $dadosFiltrados[$col] = $val;
+                }
+            }
+
+            try {
+                HistoricoContato::create($dadosFiltrados);
+            } catch (\Throwable $eHist) {
+                Log::warning('Aviso ao registrar histórico de contato: ' . $eHist->getMessage());
+            }
+
+            // 2. Atualiza a etapa específica de Segunda ou Sexta
+            if ($momento === 'segunda' || $tipoMensagem === TipoMensagemEnum::SEGUNDA || in_array($tipoMensagem, [TipoMensagemEnum::PADRAO_FAMILIA, TipoMensagemEnum::PADRAO_VERTICAL])) {
+                $visitante->contato_segunda_enviado = true;
+                $visitante->data_contato_segunda = Carbon::now();
+            }
+
+            if ($momento === 'sexta' || $tipoMensagem === TipoMensagemEnum::SEXTA) {
+                $visitante->contato_sexta_enviado = true;
+                $visitante->data_contato_sexta = Carbon::now();
+            }
+
+            // 3. Atualiza o status geral para Contactado
+            $visitante->status = StatusContatoEnum::CONTACTADO;
+            $visitante->data_ultimo_contato = Carbon::now();
+            $visitante->save();
+
+            $visitante->load(['responsavel']);
+
+            // Normalização do telefone para retorno do link
+            $telefoneLimpo = preg_replace('/[^\d]/', '', (string) $visitante->whatsapp);
+            if (strlen($telefoneLimpo) === 10 || strlen($telefoneLimpo) === 11) {
+                $telefoneLimpo = '55' . $telefoneLimpo;
+            }
+            $linkWhatsApp = 'https://api.whatsapp.com/send?phone=' . $telefoneLimpo . '&text=' . urlencode($dados['mensagem']);
+
+            try {
+                AuditoriaService::registrar(
+                    evento: 'contato_whatsapp_registrado',
+                    descricao: "Registrou contato ({$momento}) com o visitante '{$visitante->nome}'",
+                    usuario: $usuario,
+                    dados: [
+                        'visitante_id' => $visitante->id,
+                        'momento' => $momento,
+                        'tipo_mensagem' => $tipoMensagem->value ?? $tipoMensagem,
+                    ],
+                    request: $request
+                );
+            } catch (\Throwable $eAuditoria) {}
+
+            return response()->json([
+                'mensagem' => 'Contato registrado com sucesso!',
+                'link_whatsapp' => $linkWhatsApp,
+                'visitante' => new VisitanteResource($visitante),
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Erro ao registrar contato: ' . $e->getMessage());
+
+            return response()->json([
+                'mensagem' => 'Erro ao registrar contato: ' . $e->getMessage(),
+                'erro' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
+        }
+    }
+
+    /**
+     * Auto-migração resiliente para tabela historico_contatos caso falte colunas
+     */
+    private function garantirTabelaHistorico(): void
+    {
+        try {
+            if (Schema::hasTable('historico_contatos')) {
+                if (!Schema::hasColumn('historico_contatos', 'tipo_mensagem')) {
+                    Schema::table('historico_contatos', function (Blueprint $table) {
+                        $table->string('tipo_mensagem', 30)->default('personalizada')->nullable();
+                    });
+                }
+                if (!Schema::hasColumn('historico_contatos', 'mensagem')) {
+                    Schema::table('historico_contatos', function (Blueprint $table) {
+                        $table->text('mensagem')->nullable();
+                    });
+                }
+                // Permitir nulo em status_anterior e status_novo se existirem na tabela legada
+                try {
+                    \Illuminate\Support\Facades\DB::statement('ALTER TABLE historico_contatos ALTER COLUMN status_anterior DROP NOT NULL;');
+                    \Illuminate\Support\Facades\DB::statement('ALTER TABLE historico_contatos ALTER COLUMN status_novo DROP NOT NULL;');
+                } catch (\Throwable $eAlter) {}
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Aviso em garantirTabelaHistorico: ' . $e->getMessage());
+        }
     }
 }

@@ -18,6 +18,11 @@ class HistoricoContato extends Model
         'usuario_id',
         'tipo_mensagem',
         'mensagem',
+        'mensagem_enviada',
+        'status_anterior',
+        'status_novo',
+        'tipo_contato',
+        'data_contato',
     ];
 
     protected function casts(): array

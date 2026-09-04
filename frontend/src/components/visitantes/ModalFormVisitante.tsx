@@ -10,6 +10,7 @@ import { mascaraTelefone } from '@/utils/mascaras';
 import { useAuth } from '@/context/AuthContext';
 import { visitanteService } from '@/services/visitanteService';
 import { usuarioService } from '@/services/usuarioService';
+import { clsx } from 'clsx';
 
 interface ModalFormVisitanteProps {
   aberto: boolean;
@@ -43,10 +44,10 @@ export function ModalFormVisitante({
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [responsavelId, setResponsavelId] = useState<number | undefined>(undefined);
 
-  // Determina automaticamente o tipo de acolhimento ativo
-  const tipoAcolhimentoAutomatico: TipoAcolhimento =
-    visitanteParaEditar?.tipo_acolhimento ||
-    (contextoAtivo === 'vertical' ? 'vertical' : tipoAcolhimentoPadrao || 'familia');
+  // Tipo de acolhimento (Família / Vertical) com seleção controlada
+  const [tipoAcolhimento, setTipoAcolhimento] = useState<TipoAcolhimento>(
+    tipoAcolhimentoPadrao === 'vertical' || contextoAtivo === 'vertical' ? 'vertical' : 'familia'
+  );
 
   // Form State
   const [nome, setNome] = useState('');
@@ -86,6 +87,7 @@ export function ModalFormVisitante({
         setOutroComoChegou('');
       }
 
+      setTipoAcolhimento(visitanteParaEditar.tipo_acolhimento || 'familia');
       setStatus(visitanteParaEditar.status);
       setDataVisita(visitanteParaEditar.data_visita || '');
       setProximaAcao(visitanteParaEditar.proxima_acao || '');
@@ -97,6 +99,9 @@ export function ModalFormVisitante({
       setWhatsapp('');
       setOpcaoComoChegou('Convite de amigo/familiar');
       setOutroComoChegou('');
+      setTipoAcolhimento(
+        tipoAcolhimentoPadrao === 'vertical' || contextoAtivo === 'vertical' ? 'vertical' : 'familia'
+      );
       setStatus('nao_contactado');
       setDataVisita(new Date().toISOString().split('T')[0]);
       setProximaAcao('');
@@ -104,7 +109,7 @@ export function ModalFormVisitante({
       setResponsavelId(usuario?.id);
     }
     setErroGeral(null);
-  }, [visitanteParaEditar, aberto, usuario]);
+  }, [visitanteParaEditar, aberto, usuario, tipoAcolhimentoPadrao, contextoAtivo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,17 +138,23 @@ export function ModalFormVisitante({
     setSalvando(true);
 
     try {
+      // Higieniza o id do responsável para evitar valores inválidos (0, NaN) que causem erro 422
+      const responsavelValido =
+        responsavelId && !isNaN(Number(responsavelId)) && Number(responsavelId) > 0
+          ? Number(responsavelId)
+          : usuario?.id;
+
       const payload: Partial<Visitante> = {
         nome: nome.trim(),
         whatsapp: whatsapp.trim(),
         como_chegou: comoChegouFinal,
-        tipo_acolhimento: tipoAcolhimentoAutomatico,
+        tipo_acolhimento: tipoAcolhimento,
         // No cadastro é sempre nao_contactado; na edição preserva o status selecionado
         status: visitanteParaEditar ? status : 'nao_contactado',
         data_visita: dataVisita || new Date().toISOString().split('T')[0],
         proxima_acao: proximaAcao.trim() || null,
         observacoes: observacoes.trim() || null,
-        usuario_responsavel_id: usuario?.e_admin ? responsavelId : (visitanteParaEditar?.usuario_responsavel_id || usuario?.id),
+        usuario_responsavel_id: responsavelValido,
       };
 
       let res;
@@ -156,7 +167,13 @@ export function ModalFormVisitante({
       onSucesso(res.visitante);
       onClose();
     } catch (err: any) {
-      setErroGeral(err.message || 'Ocorreu um erro ao salvar o visitante.');
+      console.error('Erro ao salvar visitante:', err);
+      const mensagemErro =
+        err.data?.message ||
+        err.data?.mensagem ||
+        err.message ||
+        'Ocorreu um erro ao salvar o visitante no servidor.';
+      setErroGeral(mensagemErro);
     } finally {
       setSalvando(false);
     }
@@ -198,6 +215,41 @@ export function ModalFormVisitante({
           onChange={(e) => setWhatsapp(mascaraTelefone(e.target.value))}
           required
         />
+
+        {/* Área de Acolhimento (Família ou Vertical para Admin) */}
+        {(usuario?.e_admin || contextoAtivo === 'admin') && (
+          <div className="space-y-1.5 text-left w-full">
+            <label className="block text-[clamp(0.68rem,2.2vw,0.75rem)] font-bold text-slate-700 uppercase tracking-wider">
+              Área de Acolhimento *
+            </label>
+            <div className="grid grid-cols-2 gap-2 w-full">
+              <button
+                type="button"
+                onClick={() => setTipoAcolhimento('familia')}
+                className={clsx(
+                  'h-11 rounded-xl font-semibold text-xs transition-smooth border flex items-center justify-center gap-1.5 box-border',
+                  tipoAcolhimento === 'familia'
+                    ? 'bg-[#1E3370] text-white border-[#1E3370] shadow-2xs font-bold'
+                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                )}
+              >
+                <span>Acolher Família</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setTipoAcolhimento('vertical')}
+                className={clsx(
+                  'h-11 rounded-xl font-semibold text-xs transition-smooth border flex items-center justify-center gap-1.5 box-border',
+                  tipoAcolhimento === 'vertical'
+                    ? 'bg-[#1E3370] text-white border-[#1E3370] shadow-2xs font-bold'
+                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                )}
+              >
+                <span>Acolher Vertical</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Seleção de Voluntário / Responsável (Exibido apenas para Administradores) */}
         {usuario?.e_admin && (

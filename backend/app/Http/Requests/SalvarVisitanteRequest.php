@@ -15,6 +15,34 @@ class SalvarVisitanteRequest extends FormRequest
     }
 
     /**
+     * Prepara os dados antes da validação para evitar inconsistências.
+     */
+    protected function prepareForValidation(): void
+    {
+        $mergeData = [];
+
+        // Higieniza usuario_responsavel_id: se for vazio, 0, ou inválido, usa o id do usuário logado
+        $respId = $this->input('usuario_responsavel_id');
+        if (empty($respId) || !is_numeric($respId) || (int) $respId <= 0) {
+            $mergeData['usuario_responsavel_id'] = $this->user()?->id;
+        }
+
+        // Se data_visita não for informada, usa a data atual
+        if (!$this->filled('data_visita')) {
+            $mergeData['data_visita'] = date('Y-m-d');
+        }
+
+        // Se status não for informado, usa nao_contactado
+        if (!$this->filled('status')) {
+            $mergeData['status'] = 'nao_contactado';
+        }
+
+        if (!empty($mergeData)) {
+            $this->merge($mergeData);
+        }
+    }
+
+    /**
      * Regras de validação para criação ou edição de visitante.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>

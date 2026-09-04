@@ -78,31 +78,54 @@ class VisitanteController extends Controller
      */
     public function store(SalvarVisitanteRequest $request): JsonResponse
     {
-        $dados = $request->validated();
-        $dados['data_visita'] = $dados['data_visita'] ?? Carbon::now()->format('Y-m-d');
-        $dados['status'] = $dados['status'] ?? StatusContatoEnum::NAO_CONTACTADO->value;
-        $dados['usuario_responsavel_id'] = $dados['usuario_responsavel_id'] ?? $request->user()->id;
-        $dados['ativo'] = $dados['ativo'] ?? true;
+        try {
+            $this->garantirColunaMesAno();
 
-        $visitante = Visitante::create($dados);
-        $visitante->load(['responsavel', 'historicoContatos']);
+            $dados = $request->validated();
+            $dados['data_visita'] = $dados['data_visita'] ?? Carbon::now()->format('Y-m-d');
+            $dados['status'] = $dados['status'] ?? StatusContatoEnum::NAO_CONTACTADO->value;
+            $dados['usuario_responsavel_id'] = $dados['usuario_responsavel_id'] ?? $request->user()->id;
+            $dados['ativo'] = $dados['ativo'] ?? true;
 
-        AuditoriaService::registrar(
-            evento: 'visitante_criado',
-            descricao: "Cadastrou o visitante '{$visitante->nome}' ({$visitante->tipo_acolhimento?->value})",
-            usuario: $request->user(),
-            dados: [
-                'visitante_id' => $visitante->id,
-                'nome' => $visitante->nome,
-                'tipo_acolhimento' => $visitante->tipo_acolhimento?->value,
-            ],
-            request: $request
-        );
+            // Se mes_ano não existir na tabela, remove do array para evitar SQLSTATE[42703]
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('visitantes', 'mes_ano')) {
+                unset($dados['mes_ano']);
+            }
 
-        return response()->json([
-            'mensagem' => 'Visitante cadastrado com sucesso!',
-            'visitante' => new VisitanteResource($visitante),
-        ], 201);
+            $visitante = Visitante::create($dados);
+            $visitante->load(['responsavel']);
+
+            try {
+                AuditoriaService::registrar(
+                    evento: 'visitante_criado',
+                    descricao: "Cadastrou o visitante '{$visitante->nome}' ({$visitante->tipo_acolhimento?->value})",
+                    usuario: $request->user(),
+                    dados: [
+                        'visitante_id' => $visitante->id,
+                        'nome' => $visitante->nome,
+                        'tipo_acolhimento' => $visitante->tipo_acolhimento?->value,
+                    ],
+                    request: $request
+                );
+            } catch (\Throwable $eAuditoria) {
+                \Illuminate\Support\Facades\Log::warning('Auditoria não registrada para visitante_criado: ' . $eAuditoria->getMessage());
+            }
+
+            return response()->json([
+                'mensagem' => 'Visitante cadastrado com sucesso!',
+                'visitante' => new VisitanteResource($visitante),
+            ], 201);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Erro ao cadastrar visitante: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request' => $request->all(),
+            ]);
+
+            return response()->json([
+                'mensagem' => 'Erro ao cadastrar visitante: ' . $e->getMessage(),
+                'erro' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
+        }
     }
 
     /**
@@ -122,22 +145,56 @@ class VisitanteController extends Controller
      */
     public function update(SalvarVisitanteRequest $request, Visitante $visitante): JsonResponse
     {
-        $dados = $request->validated();
-        $visitante->update($dados);
-        $visitante->load(['responsavel', 'historicoContatos.usuario']);
+        try {
+            $this->garantirColunaMesAno();
 
-        AuditoriaService::registrar(
-            evento: 'visitante_atualizado',
-            descricao: "Atualizou dados do visitante '{$visitante->nome}'",
-            usuario: $request->user(),
-            dados: ['visitante_id' => $visitante->id],
-            request: $request
-        );
+            $dados = $request->validated();
 
-        return response()->json([
-            'mensagem' => 'Dados do visitante atualizados com sucesso!',
-            'visitante' => new VisitanteResource($visitante),
-        ]);
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('visitantes', 'mes_ano')) {
+                unset($dados['mes_ano']);
+            }
+
+            $visitante->update($dados);
+            $visitante->load(['responsavel']);
+
+            try {
+                AuditoriaService::registrar(
+                    evento: 'visitante_atualizado',
+                    descricao: "Atualizou dados do visitante '{$visitante->nome}'",
+                    usuario: $request->user(),
+                    dados: ['visitante_id' => $visitante->id],
+                    request: $request
+                );
+            } catch (\Throwable $eAuditoria) {}
+
+            return response()->json([
+                'mensagem' => 'Dados do visitante atualizados com sucesso!',
+                'visitante' => new VisitanteResource($visitante),
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Erro ao atualizar visitante: ' . $e->getMessage());
+
+            return response()->json([
+                'mensagem' => 'Erro ao atualizar visitante: ' . $e->getMessage(),
+                'erro' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
+        }
+    }
+
+    /**
+     * Auto-migração resiliente para a coluna mes_ano se ausente no banco.
+     */
+    private function garantirColunaMesAno(): void
+    {
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('visitantes') && !\Illuminate\Support\Facades\Schema::hasColumn('visitantes', 'mes_ano')) {
+                \Illuminate\Support\Facades\Schema::table('visitantes', function (\Illuminate\Database\Schema\Blueprint $table) {
+                    $table->string('mes_ano', 10)->nullable();
+                });
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Aviso em garantirColunaMesAno: ' . $e->getMessage());
+        }
     }
 
     /**

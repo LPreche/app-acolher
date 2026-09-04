@@ -73,13 +73,19 @@ class Visitante extends Model
     ];
 
     /**
-     * Auto-preenche 'mes_ano' com base na 'data_visita'.
+     * Auto-preenche 'mes_ano' com base na 'data_visita' se a coluna existir no banco.
      */
     protected static function booted(): void
     {
         static::saving(function (Visitante $visitante) {
-            if ($visitante->data_visita) {
-                $visitante->mes_ano = Carbon::parse($visitante->data_visita)->format('m/Y');
+            try {
+                if ($visitante->data_visita && \Illuminate\Support\Facades\Schema::hasColumn('visitantes', 'mes_ano')) {
+                    $visitante->mes_ano = Carbon::parse($visitante->data_visita)->format('m/Y');
+                } else {
+                    unset($visitante->mes_ano);
+                }
+            } catch (\Throwable $e) {
+                unset($visitante->mes_ano);
             }
         });
     }
